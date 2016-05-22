@@ -10,15 +10,15 @@
 .globl _start
 
 _start:
-  pushl $0x0	# push second argument
+  pushl $0x0	    # push second argument
   pushl $0x2        # push first argument
-  call power	# call the function
+  call power	    # call the function
   addl $0x8, %esp   # move the stack pointer back 2 longs  
 
-  pushl %eax	# save the first answer onto the stack before
+  pushl %eax	    # save the first answer onto the stack before
                     # calling the next function
 
-  pushl $0x0        # push second argument
+  pushl $0x0       # push second argument
   pushl $0x3        # push first argument
   call power        # call the function
   addl $0x8, %esp   # move the stack pointer back 2 longs
@@ -63,7 +63,7 @@ power:
   
 power_loop_start:
   cmpl $0x0, %ecx         # compare exponent to 0, return original number if so
-  je end_zero_power	      # end and return original value
+  je end_zero_power	  # end and return original value
   cmpl $0x1, %ecx         # compare exponent to 1, we are done if so
   je end_power            # jump to end
   movl -0x4(%ebp), %eax   # move the current result into %eax
@@ -73,9 +73,9 @@ power_loop_start:
   jmp power_loop_start    # run for the next power
 
 end_zero_power:
-  movl $0x1, %eax         # anything to the zero power is 1 
+  movl $0x1, %eax   	  # anything to the zero power is 1 
   movl %ebp, %esp         # restore the stack pointer
-  popl %ebp               # restore the base pointer
+  popl %ebp		  # restore the base pointer
   ret
  
 end_power:

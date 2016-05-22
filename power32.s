@@ -10,16 +10,16 @@
 .globl _start
 
 _start:
-  pushl $0x3	# push second argument
+  pushl $0x2	    # push second argument
   pushl $0x2        # push first argument
-  call power	# call the function
+  call power	    # call the function
   addl $0x8, %esp   # move the stack pointer back 2 longs  
 
-  pushl %eax	# save the first answer onto the stack before
+  pushl %eax	    # save the first answer onto the stack before
                     # calling the next function
 
   pushl $0x2        # push second argument
-  pushl $0x5        # push first argument
+  pushl $0x3        # push first argument
   call power        # call the function
   addl $0x8, %esp   # move the stack pointer back 2 longs
   
