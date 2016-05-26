@@ -2,13 +2,13 @@
 #	   with all letters converted to uppercase.
 #
 # PROCESSING: 1) Open the input file
-#	      2) Open the output file
+#	          2) Open the output file
 #             3) While we're not at the end of the input file
-#		a) read part of the file into our memory buffer
-#		b) go through each byte of memory
-#		   i) if the byte is a lower-case letter,
-#		  ii) convert it to uppercase
-#               c) write the memory buffer to output file
+#		         a) read part of the file into our memory buffer
+#		         b) go through each byte of memory
+#		              i) if the byte is a lower-case letter,
+#		             ii) convert it to uppercase
+#                c) write the memory buffer to output file
 
 .section .data
 # 32-bit syscall numbers
@@ -33,6 +33,9 @@
 # EOF
 .equ END_OF_FILE, 0x0
 
+# ARGS
+.equ NUMBER_ARGUMENTS, 0x2
+
 .section .bss
 # buffer
 .equ BUFFER_SIZE, 500
@@ -50,25 +53,25 @@
 
 .globl _start
 _start:
-  movl  %esp, %ebp		     # save the stack pointer
+  movl %esp, %ebp		             # save the stack pointer
   subl $ST_SIZE_RESERVE, %esp        # allocate space for FDs on stack
 
 open_files:
 open_fd_in:
-  movl $SYS_OPEN, %eax		     # open syscall
+  movl $SYS_OPEN, %eax		        # open syscall
   movl ST_ARGV_1(%ebp), %ebx        # input filename into %ebx
-  movl $O_RDONLY, %ecx		     # read-only flag
-  movl $0666, %edx		     # not really necessary for reading
-  int $LINUX_SYSCALL		     # call the kernel
+  movl $O_RDONLY, %ecx		        # read-only flag
+  movl $0666, %edx		            # not really necessary for reading
+  int $LINUX_SYSCALL		        # call the kernel
 
 store_fd_in:
   movl %eax, ST_FD_IN(%ebp)          # store the given file descriptor (from kernel)
 
 open_fd_out:
-  movl $SYS_OPEN, %eax               # open syscall
+  movl $SYS_OPEN, %eax              # open syscall
   movl ST_ARGV_2(%ebp), %ebx        # output filename into %ebx
-  movl $O_CREAT_WRONLY_TRUNC, %ecx   # flags for writing to the file
-  movl $0666, %edx		     # mode for new file (if created)	 
+  movl $O_CREAT_WRONLY_TRUNC, %ecx  # flags for writing to the file
+  movl $0666, %edx		            # mode for new file (if created)	 
 
 store_fd_out:
   movl %eax, ST_FD_OUT(%ebp)	     # store the given file descriptor (from kernel)
@@ -89,15 +92,15 @@ read_loop_begin:
 # convert buffer to uppercase
 continue_read_loop:
   pushl $BUFFER_DATA		     # location of buffer
-  pushl %eax			     # size of the buffer
+  pushl %eax			         # size of the buffer
   call convert_to_upper
-  popl %eax			     # get the size back
-  addl $0x4, %esp                    # restore esp
+  popl %eax			             # get the size back
+  addl $0x4, %esp                # restore esp
 
 # write buffer to output file
-  movl %eax, %edx		     # size of the buffer
-  movl $SYS_WRITE, %eax	             # write syscall
-  movl ST_FD_OUT(%ebp), %ebx         # file to use
+  movl $BUFFER_SIZE, %edx		         # size of the buffer
+  movl $SYS_WRITE, %eax	         # write syscall
+  movl ST_FD_OUT(%ebp), %ebx     # file to use
   movl $BUFFER_DATA, %ecx	     # location of the buffer
   int $LINUX_SYSCALL		     # size of buffer written returned in %eax
 
@@ -107,17 +110,17 @@ continue_read_loop:
 end_loop:
 # close files
   movl $SYS_CLOSE, %eax		     # close syscall
-  movl ST_FD_OUT(%ebp), %ebx         # output file fd
-  int $LINUX_SYSCALL                 # call the kernel
+  movl ST_FD_OUT(%ebp), %ebx     # output file fd
+  int $LINUX_SYSCALL             # call the kernel
 
-  movl $SYS_CLOSE, %eax              # close syscall
-  movl ST_FD_IN(%ebp), %ebx          # input file fd
-  int $LINUX_SYSCALL                 # call the kernel
+  movl $SYS_CLOSE, %eax          # close syscall
+  movl ST_FD_IN(%ebp), %ebx      # input file fd
+  int $LINUX_SYSCALL             # call the kernel
 
 # exit
   movl $SYS_EXIT, %eax		     # exit syscall
-  movl $0x0, %ebx		     # exit code 0 -> exit cleanly
-  int $LINUX_SYSCALL                 # call the kernel
+  movl $0x0, %ebx		         # exit code 0 -> exit cleanly
+  int $LINUX_SYSCALL             # call the kernel
 
 # PURPOSE: This function actually does the conversion 
 #          to upper case for a block of memory
@@ -128,7 +131,7 @@ end_loop:
 # OUTPUT: The function overwrites the current buffer with the uppercased version.
 #
 # VARIABLES:
-#	%eax - beginning of buffer
+#	    %eax - beginning of buffer
 #       %ebx - length of buffer
 #       %edi - current buffer offset
 #       %cl  - current byte being examined (lowest part of %ecx)
@@ -147,12 +150,12 @@ end_loop:
 .equ ST_BUFFER, 0xC                # actual buffer
 
 convert_to_upper:
-  pushl %ebp		           # standard preamble (push base pointer to stack)
+  pushl %ebp		               # standard preamble (push base pointer to stack)
   movl  %esp, %ebp                 # standard preamble (copy stack pointer to %ebp)
 
   movl ST_BUFFER(%ebp), %eax       # first argument, location of buffer
   movl ST_BUFFER_LEN(%ebp), %ebx   # second argument, size of buffer
-  movl $0x0, %edi	           # start with the first byte (0)
+  movl $0x0, %edi	               # start with the first byte (0)
   
   cmpl $0x0, %ebx                  # if buffer size is 0, exit
   je end_convert_loop
@@ -168,13 +171,13 @@ convert_loop:
   movb %cl, (%eax, %edi, 0x1)      # and store it back
 
 next_byte:
-  incl %edi			   # next byte
-  cmpl %edi, %ebx  	           # compare against buffer length
-  jne convert_loop		   # keep going
+  incl %edi			               # next byte
+  cmpl %edi, %ebx  	               # compare against buffer length
+  jne convert_loop		           # keep going
 
 end_convert_loop:
-  movl $0x0, %eax	           # return 0 on success
-  movl %ebp, %esp		   # standard return (restore stack pointer)
-  popl %ebp	                   # standard return (pop base pointer off stack)
+  movl $0x0, %eax	               # return 0 on success
+  movl %ebp, %esp		           # standard return (restore stack pointer)
+  popl %ebp	                       # standard return (pop base pointer off stack)
   ret
  
