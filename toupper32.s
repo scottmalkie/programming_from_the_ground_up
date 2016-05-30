@@ -98,7 +98,7 @@ continue_read_loop:
   addl $0x4, %esp                # restore esp
 
 # write buffer to output file
-  movl $BUFFER_SIZE, %edx		         # size of the buffer
+  movl $BUFFER_SIZE, %edx		 # size of the buffer
   movl $SYS_WRITE, %eax	         # write syscall
   movl ST_FD_OUT(%ebp), %ebx     # file to use
   movl $BUFFER_DATA, %ecx	     # location of the buffer
